@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJS - AMBERSIVE DB Service</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.js"></script>
+    <script src="../build/db.js"></script>
+    <script>
+
+        angular.module('app', ['ambersive.db','ngRoute'])
+                .config(['$dbSettingsProvider',
+                    function ($dbSettingsProvider) {
+
+                        $dbSettingsProvider.setBaseUrl('API-BASE-URL');
+
+                        $dbSettingsProvider.register('Github',{'url':'api/v1/pages',except:[]});
+
+                    }
+                ])
+                .controller('DemoController',function($scope,DB,$q,$timeout){
+
+                    var failed = function(data){
+                        console.log(arguments);
+                    };
+
+                    DB('Github').get().then(function(result){
+                        console.log(result);
+                    },failed);
+
+                    DB('Github').getById(10).then(function(result){
+                        console.log(result);
+                    },failed);
+
+                    DB('Github').delete(10).then(function(result){
+                        console.log(result);
+                    },failed);
+
+                    DB('Github').update(10,{}).then(function(result){
+                        console.log(result);
+                    },failed);
+
+                    DB('Github').create({}).then(function(result){
+                        console.log(result);
+                    },failed);
+
+                });
+
+    </script>
+</head>
+<body ng-app="app">
+    <div ng-controller="DemoController">
+        <h1>DB-Service</h1>
+    </div>
+</body>
+</html>
