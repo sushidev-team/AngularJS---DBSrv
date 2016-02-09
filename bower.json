@@ -1,6 +1,6 @@
 {
   "name": "ambersive-dbsrv",
-  "version": "0.0.1.0",
+  "version": "0.0.1.1",
   "authors": [
     "Manuel Ihl <manuel.ihl@ambersive.com>"
   ],
@@ -10,11 +10,13 @@
     "AngularJS",
     "Angular",
     "Restful",
-    "Rest"
+    "Rest",
+    "API",
+    "Database"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com:AMBERSIVE/AngularJS---RestService.git"
+    "url": "git://github.com:AMBERSIVE/AngularJS---DBSrv.git"
   },
   "ignore": [
     "node_modules",
