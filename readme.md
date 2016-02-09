@@ -8,7 +8,7 @@ Please notice this module is still under construction.
 This module will be maintained by www.ambersive.com
 
 ### Version
-0.0.1.1
+0.0.2.0
 
 ### Installation
 
@@ -62,8 +62,6 @@ or you can define a route "on-the-fly" by passing an object:
 
 ### Useage
 
-First
-
 ```sh
 angular.module('app').controller('DemoController', function($scope, DB) {
 
@@ -94,6 +92,8 @@ angular.module('app').controller('DemoController', function($scope, DB) {
 });
 ```
 
+Please notice, that a stored access token will be added to every request. If available in the response header it will be stored in the localstorage.
+
 ### Options
 
 Currently the module offers some possibilities to delete predefined functions.
@@ -111,7 +111,40 @@ The following example removes the get & getById function.
         ]);
 
 ```
+### Settings
 
+The following variables can be set:
+
+```sh
+ angular.module('app', ['ambersive.db','ngRoute'])
+        .config(['$dbSettingsProvider',
+            function ($dbSettingsProvider) {
+
+                $dbSettingsProvider.register('NAME',{'url':'api/v1/pages',except:['get','getById']});
+                $dbSettingsProvider.setBaseUrl(value);
+                $dbSettingsProvider.setContentType(value);
+                $dbSettingsProvider.setTokenAttribute(value);
+                $dbSettingsProvider.setStorageName(value);
+
+            }
+        ]);
+
+```
+
+```sh
+ angular.module('app', ['ambersive.db'])
+        .controller('DemoController',function($scope,$dbSettings){
+
+            var baseUrl         = $dbSettings.baseUrl,
+                contentType     = $dbSettings.contentType,
+                routes          = $dbSettings.routes,
+                storageName     = $dbSettings.storageName,
+                tokenName       = $dbSettings.tokenName,
+                tokenType       = $dbSettings.tokenType;
+
+        ]);
+
+```
 
 License
 ----

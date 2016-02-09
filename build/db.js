@@ -16,15 +16,45 @@
             var authenticationInjector = {
                 request: function (config) {
 
-                    var deferred = $q.defer();
+                    var deferred    = $q.defer(),
+                        storageName = $dbSettings.storageName,
+                        tokenName   = $dbSettings.tokenName,
+                        tokenType   = $dbSettings.tokenType,
+                        tokenData   = null,
+                        fn          = function(config){
+                            deferred.resolve(config);
+                        };
 
-                    $log.log(config);
+                    if(storageName === undefined || storageName === '' || storageName.length === 0){
+                        $log.warn('ambersive.db: LocalStorage name is not set');
+                    }
 
-                    $timeout(function(){
-                        deferred.resolve(config);
-                    },100);
+                    if(typeof(Storage) !== "undefined") {
+                        tokenData = localStorage.getItem(storageName);
+                    } else {
+                        $log.warn('ambersive.db: this browser doesn\'t support localStorage');
+                    }
+
+                    config.headers[tokenName] = tokenData;
+
+                    fn(config);
 
                     return deferred.promise;
+                },
+                'response': function(response) {
+
+                    var headers = response.headers(),
+                        storageName = $dbSettings.storageName;
+
+                    if(headers[storageName] !== undefined && headers[storageName] !== ''){
+                        if(typeof(Storage) !== "undefined") {
+                            localStorage.setItem(storageName,headers[storageName]);
+                        } else {
+                            $log.warn('ambersive.db: this browser doesn\'t support localStorage');
+                        }
+                    }
+
+                    return response;
                 }
             };
             return authenticationInjector;
@@ -42,8 +72,9 @@
 
             var baseUrl         = '',
                 contentType     = 'application/json; charset=utf-8;',
+                storageName     = 'accessToken',
                 tokenType       = 'Bearer',
-                tokenName       = '',
+                tokenName       = 'Authorization',
                 routes          = {};
 
             // Setter
@@ -57,12 +88,32 @@
                 return routes[name];
             };
 
-            var setBaseUrl = function(name){
-                baseUrl = name;
+            var setBaseUrl = function(url){
+                baseUrl = url;
+                return baseUrl;
             };
 
             var setContentType = function(type){
                 contentType = type;
+                return contentType;
+            };
+
+            var setTokenAttribute = function(name,value){
+                if(name === undefined || value === undefined){ return; }
+                switch(name){
+                    case 'tokenType':
+                        tokenType = value;
+                        break;
+                    default:
+                        tokenName = value;
+                        break;
+                }
+                return value;
+            };
+
+            var setStorageName = function(value){
+                storageName = value;
+                return storageName;
             };
 
             // Getter
@@ -71,12 +122,17 @@
                 register:registerRoute,
                 setBaseUrl:setBaseUrl,
                 setContentType:setContentType,
+                setTokenAttribute:setTokenAttribute,
+                setStorageName:setStorageName,
                 $get: function () {
                     return {
                         baseUrl:baseUrl,
                         contentType:contentType,
                         routes:routes,
-                        route:getRoute
+                        route:getRoute,
+                        storageName:storageName,
+                        tokenName:tokenName,
+                        tokenType:tokenType
                     };
                 }
             };
@@ -97,7 +153,7 @@
                         seperator   = '/',
                         url         = '';
 
-                    if(obj !== undefined && obj.baseUrl !== undefined){
+                    if(obj !== undefined && obj.baseUrl !== undefined && obj.baseUrl.length > 0){
                         baseUrl = obj.baseUrl;
                     }
 

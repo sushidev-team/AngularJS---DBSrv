@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>AngularJS - AMBERSIVE DB Service</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.js"></script>
     <script src="../build/db.js"></script>
@@ -12,9 +13,9 @@
                 .config(['$dbSettingsProvider',
                     function ($dbSettingsProvider) {
 
-                        $dbSettingsProvider.setBaseUrl('API-BASE-URL');
+                        $dbSettingsProvider.setBaseUrl('http://jsonplaceholder.typicode.com/');
 
-                        $dbSettingsProvider.register('Github',{'url':'api/v1/pages',except:[]});
+                        $dbSettingsProvider.register('Github',{'url':'posts',except:[]});
 
                     }
                 ])
@@ -25,23 +26,23 @@
                     };
 
                     DB('Github').get().then(function(result){
-                        console.log(result);
+                        $scope.getData = result;
                     },failed);
 
                     DB('Github').getById(10).then(function(result){
-                        console.log(result);
+                        $scope.getByIdData = result;
                     },failed);
 
                     DB('Github').delete(10).then(function(result){
-                        console.log(result);
+                        $scope.deleteData = result;
                     },failed);
 
-                    DB('Github').update(10,{}).then(function(result){
-                        console.log(result);
+                    DB('Github').update(10,{'test':'asdf'}).then(function(result){
+                        $scope.updateData = result;
                     },failed);
 
-                    DB('Github').create({}).then(function(result){
-                        console.log(result);
+                    DB('Github').create({'id':100}).then(function(result){
+                        $scope.createData = result;
                     },failed);
 
                 });
@@ -50,7 +51,39 @@
 </head>
 <body ng-app="app">
     <div ng-controller="DemoController">
-        <h1>DB-Service</h1>
+        <div class="container">
+            <h1>DB-Service</h1>
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <h2>Get-Data</h2>
+                    <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{getData}}</pre>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    <h2>Get by Id Data</h2>
+                    <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{getByIdData}}</pre>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <h2>Post-Data</h2>
+                    <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{createData}}</pre>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    <h2>Put-Data</h2>
+                    <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{updateData}}</pre>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <h2>Delete-Data</h2>
+                    <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{deleteData}}</pre>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+
+                </div>
+            </div>
+
+        </div>
     </div>
 </body>
 </html>
