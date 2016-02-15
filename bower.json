@@ -1,11 +1,11 @@
 {
   "name": "ambersive-db",
-  "version": "0.0.2.4",
+  "version": "0.0.2.5",
   "authors": [
     "Manuel Ihl <manuel.ihl@ambersive.com>"
   ],
   "description": "Easy way to register an use a  RESTful-API with this AngularJS module.",
-  "main": "build/rest.js",
+  "main": "build/db.js",
   "keywords": [
     "AngularJS",
     "Angular",
