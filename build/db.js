@@ -304,6 +304,10 @@
                         var except = [],
                             data = $dbSettings.route(name);
 
+                        if(data === undefined && angular.isObject(arguments[0])){
+                            data = settingsObject;
+                        }
+
                         if(data !== undefined && data.except !== undefined){ except = data.except; }
 
                         if(except.length > 0){
@@ -316,7 +320,7 @@
 
                     }
 
-                    if(angular.isObject(arguments[0]) && arguments[0].name !== undefined){
+                    if(angular.isObject(arguments[0]) && arguments[0].name !== undefined && arguments[0].fnName !== undefined){
                         routes[name][arguments[0].fnName] = arguments[0].fn;
                     }
 
