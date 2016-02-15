@@ -179,7 +179,7 @@
 
                     params.headers['Content-Type'] = $dbSettings.contentType;
 
-                    if(obj.contentType !== undefined){
+                    if(obj !== undefined && obj.contentType !== undefined){
                         params.headers['Content-Type'] = obj.contentType;
                     }
 
@@ -188,6 +188,7 @@
                 };
 
             var Route = function(settingsObj){
+                console.warn(settingsObj);
                 return {
                     get:function(){
                         var deferred = $q.defer(),
@@ -288,7 +289,17 @@
                     }
 
                     if(routes[name] === undefined){
-                        routes[name] = new Route($dbSettings.route(name));
+
+                        /**
+                         * If the first argument is an object the settings-object will be it
+                         */
+
+                        var settingsObject = $dbSettings.route(name);
+                        if(settingsObject === undefined || angular.isObject(arguments[0])){
+                            settingsObject = arguments[0];
+                        }
+
+                        routes[name] = new Route(settingsObject);
 
                         var except = [],
                             data = $dbSettings.route(name);
