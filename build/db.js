@@ -35,7 +35,7 @@
                         $log.warn('ambersive.db: this browser doesn\'t support localStorage');
                     }
 
-                    config.headers[tokenName] = tokenData;
+                    config.headers[tokenName] = tokenType+' '+tokenData;
 
                     fn(config);
 
@@ -43,15 +43,20 @@
                 },
                 'response': function(response) {
 
-                    var headers = response.headers(),
-                        storageName = $dbSettings.storageName;
-
-                    if(headers[storageName] !== undefined && headers[storageName] !== ''){
-                        if(typeof(Storage) !== "undefined") {
-                            localStorage.setItem(storageName,headers[storageName]);
-                        } else {
-                            $log.warn('ambersive.db: this browser doesn\'t support localStorage');
+                    var read = function(name){
+                        if(headers[name] !== undefined && headers[name] !== ''){
+                            if(typeof(Storage) !== "undefined") {
+                                localStorage.setItem(storageName,headers[name]);
+                                return headers[name];
+                            } else {
+                                $log.warn('ambersive.db: this browser doesn\'t support localStorage');
+                            }
                         }
+                    };
+
+                    var value = read(storageName);
+                    if(value === undefined || value === ''){
+                        value = read(storageName.toLocaleLowerCase());
                     }
 
                     return response;
