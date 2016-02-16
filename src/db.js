@@ -43,8 +43,8 @@
                 },
                 'response': function(response) {
 
-                    var storageName = $dbSettings.storageName,
-                        tokenName   = $dbSettings.tokenName;
+                    var headers = response.headers(),
+                        storageName = $dbSettings.storageName;
 
                     var read = function(name){
                         if(headers[name] !== undefined && headers[name] !== ''){

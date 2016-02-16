@@ -1,6 +1,6 @@
 {
   "name": "ambersive-db",
-  "version": "0.0.2.9",
+  "version": "0.0.3.0",
   "authors": [
     "Manuel Ihl <manuel.ihl@ambersive.com>"
   ],
@@ -26,6 +26,7 @@
   "homepage": "http://www.ambersive.com",
   "dependencies": {
     "angular": "angularjs#^1.5.0",
-    "bootstrap": "^3.3.6"
+    "bootstrap": "^3.3.6",
+    "ambersive-db": "*"
   }
 }
