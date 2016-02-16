@@ -287,7 +287,7 @@
                         if(arguments[1] !== undefined){
                             addParam = arguments[1];
                         }
- 
+
                     }
 
                     if(angular.isString(arguments[0])){
@@ -346,6 +346,26 @@
 
         }
     ]);
+
+    angular.module('ambersive.db').factory('REST',['$q','$log','$http','$dbSettings',
+        function($q,$log,$http,$dbSettings){
+            var REST = function(params){
+                var deferred = $q.defer();
+
+                $http(params)
+                    .success(function(data,status,headers,config){
+                        deferred.resolve(data);
+                    })
+                    .error(function(data,status,headers,config){
+                        deferred.reject(data);
+                    });
+
+                return deferred.promise;
+            };
+            return REST;
+        }
+    ]);
+
 
 
 })(window, document, undefined);

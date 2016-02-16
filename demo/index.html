@@ -19,7 +19,7 @@
 
                     }
                 ])
-                .controller('DemoController',function($scope,DB,$q,$timeout){
+                .controller('DemoController',function($scope,DB,REST,$q,$timeout){
 
                     var failed = function(data){
                         console.log(arguments);
@@ -44,6 +44,10 @@
                     DB('Github').create({'id':100}).then(function(result){
                         $scope.createData = result;
                     },failed);
+
+                    REST({method:'get','url':'http://jsonplaceholder.typicode.com/posts'}).then(function(){
+                        alert('done');
+                    });
 
 
                 });
