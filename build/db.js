@@ -43,6 +43,9 @@
                 },
                 'response': function(response) {
 
+                    var storageName = $dbSettings.storageName,
+                        tokenName   = $dbSettings.tokenName;
+
                     var read = function(name){
                         if(headers[name] !== undefined && headers[name] !== ''){
                             if(typeof(Storage) !== "undefined") {
