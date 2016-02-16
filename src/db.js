@@ -188,7 +188,6 @@
                 };
 
             var Route = function(settingsObj){
-                console.warn(settingsObj);
                 return {
                     get:function(){
                         var deferred = $q.defer(),
@@ -278,17 +277,24 @@
 
                 if(arguments.length > 0){
 
+                    var addParam = false;
+
                     // First parameter should be the name
 
                     if(angular.isObject(arguments[0]) && arguments[0].name !== undefined){
                         name = arguments[0].name;
+
+                        if(arguments[1] !== undefined){
+                            addParam = arguments[1];
+                        }
+ 
                     }
 
                     if(angular.isString(arguments[0])){
                         name = arguments[0];
                     }
 
-                    if(routes[name] === undefined){
+                    if(routes[name] === undefined && addParam === false){
 
                         /**
                          * If the first argument is an object the settings-object will be it
