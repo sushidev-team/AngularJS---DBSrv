@@ -8,7 +8,7 @@ Please notice this module is still under construction.
 This module will be maintained by www.ambersive.com
 
 ### Version
-0.0.3.0
+0.0.4.0
 
 ### Installation
 
@@ -62,6 +62,8 @@ or you can define a route "on-the-fly" by passing an object:
 
 ### Useage
 
+Please notice that the get function always offers the change to add an ID and/or querystring params (as object).
+
 ```sh
 angular.module('app').controller('DemoController', function($scope, DB) {
 
@@ -72,6 +74,14 @@ angular.module('app').controller('DemoController', function($scope, DB) {
     DB('Github').get().then(function(result){
         console.log(result);
     },failed);
+
+    DB('Github').get(10).then(function(result){
+        console.log(result);
+    },failed);
+
+    DB('Github').get({page:1}).then(function(result){
+            console.log(result);
+        },failed);
 
     DB('Github').getById(10).then(function(result){
         console.log(result);

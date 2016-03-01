@@ -201,6 +201,39 @@
                         var deferred = $q.defer(),
                             params = getParams('get',settingsObj);
 
+                        var argumentsData   = arguments,
+                            argumentsLength = argumentsData.length;
+
+                        if(argumentsLength > 0){
+                            for(var i=0;i<argumentsLength;i++){
+
+                                if(angular.isNumber(arguments[i])){
+                                    params.url += '/'+arguments[i];
+                                }
+                                else if(angular.isObject(arguments[i])){
+
+                                    var counter = 0;
+
+                                    for(var param in arguments[i]){
+
+                                        var seperator = '&';
+
+                                        if(counter === 0){
+                                            seperator = '?';
+                                        }
+
+                                        params.url += seperator+param+'='+arguments[i][param];
+                                        counter++;
+
+                                    }
+
+                                } else {
+                                    continue;
+                                }
+
+                            }
+                        }
+
                         $http(params)
                             .success(function(data,status,headers,config){
                                 deferred.resolve(data);
