@@ -53,7 +53,7 @@ or you can define a route "on-the-fly" by passing an object:
             // deferred.resolve(data);
 
             return deferred.promise;
-        }).custom
+        }).custom().then(successFN,errorFN);
 
     }
  ]);
