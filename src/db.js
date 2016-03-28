@@ -236,10 +236,10 @@
 
                         $http(params)
                             .success(function(data,status,headers,config){
-                                deferred.resolve(data);
+                                deferred.resolve(data,headers);
                             })
                             .error(function(data,status,headers,config){
-                                deferred.reject(data);
+                                deferred.reject(data,headers);
                             });
 
                         return deferred.promise;
@@ -252,10 +252,10 @@
 
                         $http(params)
                             .success(function(data,status,headers,config){
-                                deferred.resolve(data);
+                                deferred.resolve(data,headers);
                             })
                             .error(function(data,status,headers,config){
-                                deferred.reject(data);
+                                deferred.reject(data,headers);
                             });
 
                         return deferred.promise;
@@ -395,10 +395,10 @@
 
                 $http(params)
                     .success(function(data,status,headers,config){
-                        deferred.resolve(data);
+                        deferred.resolve(data,headers);
                     })
                     .error(function(data,status,headers,config){
-                        deferred.reject(data);
+                        deferred.reject(data,headers);
                     });
 
                 return deferred.promise;
