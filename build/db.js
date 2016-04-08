@@ -236,10 +236,10 @@
 
                         $http(params)
                             .success(function(data,status,headers,config){
-                                deferred.resolve(data);
+                                deferred.resolve(data,headers);
                             })
                             .error(function(data,status,headers,config){
-                                deferred.reject(data);
+                                deferred.reject(data,headers);
                             });
 
                         return deferred.promise;
@@ -252,10 +252,10 @@
 
                         $http(params)
                             .success(function(data,status,headers,config){
-                                deferred.resolve(data);
+                                deferred.resolve(data,headers);
                             })
                             .error(function(data,status,headers,config){
-                                deferred.reject(data);
+                                deferred.reject(data,headers);
                             });
 
                         return deferred.promise;
@@ -313,11 +313,13 @@
 
             var DBSrv = function(){
 
-                var fn = null,
-                    name = null;
+                var fn      = null,
+                    name    = null,
+                    except  = [],
+                    data;
 
                 if(arguments.length > 0){
-
+ 
                     var addParam = false;
 
                     // First parameter should be the name
@@ -348,8 +350,8 @@
 
                         routes[name] = new Route(settingsObject);
 
-                        var except = [],
-                            data = $dbSettings.route(name);
+                        except  = [];
+                        data    = $dbSettings.route(name);
 
                         if(data === undefined && angular.isObject(arguments[0])){
                             data = settingsObject;
@@ -364,6 +366,13 @@
                                 }
                             });
                         }
+
+                    } else if (addParam === true){
+
+                        except = [];
+                        data = $dbSettings.route(name);
+
+                        routes[name] = new Route(data);
 
                     }
 
@@ -395,10 +404,10 @@
 
                 $http(params)
                     .success(function(data,status,headers,config){
-                        deferred.resolve(data);
+                        deferred.resolve(data,headers);
                     })
                     .error(function(data,status,headers,config){
-                        deferred.reject(data);
+                        deferred.reject(data,headers);
                     });
 
                 return deferred.promise;
