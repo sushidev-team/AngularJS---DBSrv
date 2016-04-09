@@ -264,7 +264,8 @@
                         var deferred = $q.defer(),
                             params = getParams('put',settingsObj);
 
-                        params.url += '/'+id;
+                        params.url  += '/'+id; 
+                        params.data = data;
 
                         $http(params)
                             .success(function(data,status,headers,config){
