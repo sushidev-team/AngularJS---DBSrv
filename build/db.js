@@ -264,7 +264,7 @@
                         var deferred = $q.defer(),
                             params = getParams('put',settingsObj);
 
-                        params.url  += '/'+id; 
+                        params.url  += '/'+id;
                         params.data = data;
 
                         $http(params)
@@ -317,7 +317,8 @@
                 var fn      = null,
                     name    = null,
                     except  = [],
-                    data;
+                    data,
+                    settingsObject;
 
                 if(arguments.length > 0){
  
@@ -344,7 +345,7 @@
                          * If the first argument is an object the settings-object will be it
                          */
 
-                        var settingsObject = $dbSettings.route(name);
+                        settingsObject = $dbSettings.route(name);
                         if(settingsObject === undefined || angular.isObject(arguments[0])){
                             settingsObject = arguments[0];
                         }
@@ -370,10 +371,34 @@
 
                     } else if (addParam === true){
 
+                        settingsObject = $dbSettings.route(name);
+                        if(settingsObject === undefined || angular.isObject(arguments[0])){
+                            settingsObject = arguments[0];
+                        }
+
                         except = [];
                         data = $dbSettings.route(name);
 
-                        routes[name] = new Route(data);
+
+                        if(data === undefined && angular.isObject(arguments[0])){
+                            data = settingsObject;
+                        }
+
+                        if(routes[name] === undefined){
+
+                            routes[name] = new Route(data);
+
+                            if(data !== undefined && data.except !== undefined){ except = data.except; }
+
+                            if(except.length > 0){
+                                except.forEach(function(value,index){
+                                    if(routes[name][value] !== undefined) {
+                                        delete routes[name][value];
+                                    }
+                                });
+                            }
+
+                        }
 
                     }
 
