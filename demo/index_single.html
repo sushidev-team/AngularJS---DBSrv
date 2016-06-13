@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJS - AMBERSIVE DB Service</title>
+    <link   href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="../build/db.js"></script>
+    <script>
+
+        angular.module('app', ['ambersive.db'])
+                .config(['$dbSettingsProvider',
+                    function ($dbSettingsProvider) {
+
+                        $dbSettingsProvider.setBaseUrl('http://jsonplaceholder.typicode.com/');
+
+                        $dbSettingsProvider.register('Github',{'url':'posts',except:[]});
+                        $dbSettingsProvider.register('Github2',{'url':'posts',except:[]});
+
+                    }
+                ])
+                .controller('DemoController',function($scope,DB,REST,$q,$timeout){
+
+                    var failed = function(data){
+                        console.log(arguments);
+                    };
+
+                    DB('Github').get(10,{page:1}).then(function(result){
+                        $scope.getData = result;
+                    },failed);
+
+                    DB('Github2').get(10,{page:1}).then(function(result){
+                        $scope.getData2 = result;
+                    },failed);
+
+
+                });
+
+    </script>
+</head>
+<body ng-app="app">
+    <div ng-controller="DemoController">
+        <div class="container">
+            <h1>DB-Service</h1>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12">
+                    <h2>Get-Data</h2>
+                    <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{getData}}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

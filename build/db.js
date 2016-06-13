@@ -18,9 +18,11 @@
 
                     var deferred    = $q.defer(),
                         storageName = $dbSettings.storageName,
+                        storageLang = $dbSettings.storageLang,
                         tokenName   = $dbSettings.tokenName,
                         tokenType   = $dbSettings.tokenType,
                         tokenData   = null,
+                        langData    = null,
                         fn          = function(config){
                             deferred.resolve(config);
                         };
@@ -31,11 +33,18 @@
 
                     if(typeof(Storage) !== "undefined") {
                         tokenData = localStorage.getItem(storageName);
+                        langData = localStorage.getItem(storageLang);
                     } else {
                         $log.warn('ambersive.db: this browser doesn\'t support localStorage');
                     }
 
-                    config.headers[tokenName] = tokenType+' '+tokenData;
+                    config.headers[tokenName]   = tokenType+' '+tokenData;
+
+                    if(langData !== null) {
+
+                        config.headers['Accept-Language'] = langData;
+
+                    }
 
                     fn(config);
 
@@ -81,14 +90,17 @@
             var baseUrl         = '',
                 contentType     = 'application/json; charset=utf-8;',
                 storageName     = 'accessToken',
+                storageLang     = 'language',
                 tokenType       = 'Bearer',
                 tokenName       = 'Authorization',
+                databaseName    = 'AMBERSIVE.DB',
                 routes          = {};
 
             // Setter
 
             var registerRoute = function(name,settings){
                 routes[name] = settings;
+
                 return routes;
             };
 
@@ -124,6 +136,16 @@
                 return storageName;
             };
 
+            var setStorageLang = function(value){
+                storageLang = value;
+                return storageLang;
+            };
+
+            var setDatabaseName = function(name){
+                databaseName = name;
+                return databaseName;
+            };
+
             // Getter
 
             return {
@@ -132,6 +154,8 @@
                 setContentType:setContentType,
                 setTokenAttribute:setTokenAttribute,
                 setStorageName:setStorageName,
+                setStorageLang:setStorageLang,
+                setDatabaseName:setDatabaseName,
                 $get: function () {
                     return {
                         baseUrl:baseUrl,
@@ -139,8 +163,10 @@
                         routes:routes,
                         route:getRoute,
                         storageName:storageName,
+                        storageLang:storageLang,
                         tokenName:tokenName,
-                        tokenType:tokenType
+                        tokenType:tokenType,
+                        databaseName:databaseName
                     };
                 }
             };
@@ -340,7 +366,7 @@
                     }
 
                     if(routes[name] === undefined && addParam === false){
-
+ 
                         /**
                          * If the first argument is an object the settings-object will be it
                          */
@@ -441,7 +467,5 @@
             return REST;
         }
     ]);
-
-
 
 })(window, document, undefined);
