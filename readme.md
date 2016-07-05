@@ -8,7 +8,7 @@ Please notice this module is still under construction.
 This module will be maintained by www.ambersive.com
 
 ### Version
-0.0.4.5
+0.0.4.6
 
 ### Installation
 
@@ -60,6 +60,27 @@ or you can define a route "on-the-fly" by passing an object:
 
 ```
 
+You can check if a function exists with the $has(name)
+
+```sh
+ angular.module('app').controller('DemoController',
+    function($scope,DB,$q,$timeout){
+
+        DB({name:'GITHUB',fnName:custom,fn:function(){
+            var deferred = $q.defer();
+
+            // deferred.resolve(data);
+
+            return deferred.promise;
+        }).$has(FUNCTIONNAME).then(function(booleanResult){
+
+        });
+
+    }
+ ]);
+
+```
+
 ### Useage
 
 Please notice that the get function always offers the change to add an ID and/or querystring params (as object).
@@ -70,6 +91,10 @@ angular.module('app').controller('DemoController', function($scope, DB) {
     var failed = function(data){
        console.log(arguments);
     };
+
+    DB('Github').$has('get').then(function(bResult){
+            console.log(bResult);
+        },failed);
 
     DB('Github').get().then(function(result){
         console.log(result);

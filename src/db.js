@@ -11,6 +11,16 @@
 
     angular.module('ambersive.db',[]);
 
+    angular.module('ambersive.db', []).config(function ($provide) {
+        $provide.decorator("$exceptionHandler", function ($delegate, $injector) {
+            return function (exception, cause) {
+
+                $delegate(exception,cause);
+
+            };
+        });
+    });
+
     angular.module('ambersive.db').factory('authenticationInjector', ['$injector', '$q','$log','$dbSettings','$timeout',
         function ($injector, $q,$log,$dbSettings,$timeout) {
             var authenticationInjector = {
@@ -176,6 +186,8 @@
     angular.module('ambersive.db').factory('DB',['$q','$log','$http','$dbSettings',
         function($q,$log,$http,$dbSettings){
 
+            var callerName = '';
+
             var routes = {},
                 getParams = function(method,obj){
 
@@ -223,6 +235,19 @@
 
             var Route = function(settingsObj){
                 return {
+                    $has:function(name){
+
+                        var deferred = $q.defer();
+
+                        if(routes[callerName] === undefined || routes[callerName][name] === undefined){
+                            deferred.resolve(false);
+                        } else {
+                            deferred.resolve(true);
+                        }
+
+                        return deferred.promise;
+                        
+                    },
                     get:function(){
                         var deferred = $q.defer(),
                             params = getParams('get',settingsObj);
@@ -433,6 +458,8 @@
                     }
 
                     // return the route
+
+                    callerName = name;
 
                     fn = routes[name];
 
