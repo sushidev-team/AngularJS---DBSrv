@@ -207,10 +207,10 @@
                         url = obj.url;
                     }
 
-                    if(baseUrl !== undefined && baseUrl.length > 0 && baseUrl.slice(-1) === seperator){
+                    if(baseUrl !== undefined && baseUrl.endsWith(seperator)){
                         seperator = '';
                     } else {
-                        baseUrl = '/';
+                        baseUrl += seperator;
                     }
 
                     switch(method){
