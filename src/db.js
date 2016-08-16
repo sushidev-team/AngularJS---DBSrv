@@ -248,9 +248,13 @@
                         return deferred.promise;
                         
                     },
-                    get:function(){
+                    get:function(params){
                         var deferred = $q.defer(),
                             params = getParams('get',settingsObj);
+
+                        if(angular.isDefined(params)){
+                            params.params = params;
+                        }
 
                         var argumentsData   = arguments,
                             argumentsLength = argumentsData.length;
@@ -295,11 +299,15 @@
 
                         return deferred.promise;
                     },
-                    getById:function(id){
+                    getById:function(id,params){
                         var deferred = $q.defer(),
                             params = getParams('get',settingsObj);
 
                         params.url += '/'+id;
+
+                        if(angular.isDefined(params)){
+                            params.params = params;
+                        }
 
                         $http(params)
                             .success(function(data,status,headers,config){
