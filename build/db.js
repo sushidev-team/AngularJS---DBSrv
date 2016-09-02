@@ -11,16 +11,6 @@
 
     angular.module('ambersive.db',[]);
 
-    angular.module('ambersive.db', []).config(function ($provide) {
-        $provide.decorator("$exceptionHandler", function ($delegate, $injector) {
-            return function (exception, cause) {
-
-                $delegate(exception,cause);
-
-            };
-        });
-    });
-
     angular.module('ambersive.db').factory('authenticationInjector', ['$injector', '$q','$log','$dbSettings','$timeout',
         function ($injector, $q,$log,$dbSettings,$timeout) {
             var authenticationInjector = {
@@ -188,11 +178,13 @@
 
             var callerName = '';
 
+            var tempParams = null;
+
             var routes = {},
                 getParams = function(method,obj){
 
                     var params = {
-                      method:method.toUpperCase()
+                        method:method.toUpperCase()
                     };
 
                     var baseUrl     = $dbSettings.baseUrl,
@@ -246,11 +238,12 @@
                         }
 
                         return deferred.promise;
-                        
+
                     },
                     get:function(){
-                        var deferred = $q.defer(),
-                            params = getParams('get',settingsObj);
+                        var deferred = $q.defer();
+
+                        tempParams = getParams('get',settingsObj);
 
                         var argumentsData   = arguments,
                             argumentsLength = argumentsData.length;
@@ -259,7 +252,7 @@
                             for(var i=0;i<argumentsLength;i++){
 
                                 if(angular.isNumber(arguments[i])){
-                                    params.url += '/'+arguments[i];
+                                    tempParams.url += '/'+arguments[i];
                                 }
                                 else if(angular.isObject(arguments[i])){
 
@@ -273,7 +266,7 @@
                                             seperator = '?';
                                         }
 
-                                        params.url += seperator+param+'='+arguments[i][param];
+                                        tempParams.url += seperator+param+'='+arguments[i][param];
                                         counter++;
 
                                     }
@@ -285,7 +278,7 @@
                             }
                         }
 
-                        $http(params)
+                        $http(tempParams)
                             .success(function(data,status,headers,config){
                                 deferred.resolve(data,headers);
                             })
@@ -296,12 +289,13 @@
                         return deferred.promise;
                     },
                     getById:function(id){
-                        var deferred = $q.defer(),
-                            params = getParams('get',settingsObj);
+                        var deferred = $q.defer();
 
-                        params.url += '/'+id;
+                        tempParams = getParams('get',settingsObj);
 
-                        $http(params)
+                        tempParams.url += '/'+id;
+
+                        $http(tempParams)
                             .success(function(data,status,headers,config){
                                 deferred.resolve(data,headers);
                             })
