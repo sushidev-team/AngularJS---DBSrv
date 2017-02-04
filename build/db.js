@@ -240,10 +240,16 @@
                         return deferred.promise;
 
                     },
-                    get:function(){
+                    get:function(query){
                         var deferred = $q.defer();
 
                         tempParams = getParams('get',settingsObj);
+
+                        if(angular.isDefined(query)){
+
+                            tempParams.params = query;
+
+                        }
 
                         var argumentsData   = arguments,
                             argumentsLength = argumentsData.length;
@@ -288,12 +294,18 @@
 
                         return deferred.promise;
                     },
-                    getById:function(id){
+                    getById:function(id,query){
                         var deferred = $q.defer();
 
                         tempParams = getParams('get',settingsObj);
 
                         tempParams.url += '/'+id;
+
+                        if(angular.isDefined(query)){
+
+                            tempParams.params = query;
+
+                        }
 
                         $http(tempParams)
                             .success(function(data,status,headers,config){
@@ -322,11 +334,17 @@
 
                         return deferred.promise;
                     },
-                    create:function(data){
+                    create:function(data,query){
                         var deferred = $q.defer(),
                             params = getParams('post',settingsObj);
 
                         params.data = data;
+
+                        if(angular.isDefined(query)){
+
+                            params.params = query;
+
+                        }
 
                         $http(params)
                             .success(function(data,status,headers,config){
@@ -338,11 +356,17 @@
 
                         return deferred.promise;
                     },
-                    delete:function(id){
+                    delete:function(id,query){
                         var deferred = $q.defer(),
                             params = getParams('delete',settingsObj);
 
                         params.url += '/'+id;
+
+                        if(angular.isDefined(query)){
+
+                            params.params = query;
+
+                        }
 
                         $http(params)
                             .success(function(data,status,headers,config){

@@ -29,11 +29,11 @@
                         $scope.getData = result;
                     },failed);
 
-                    DB('Github').getById(10).then(function(result){
+                    DB('Github').getById(10,{'test':'asdf'}).then(function(result){
                         $scope.getByIdData = result;
                     },failed);
 
-                    DB('Github').delete(10).then(function(result){
+                    DB('Github').delete(10,{'test':'asdf'}).then(function(result){
                         $scope.deleteData = result;
                     },failed);
 
