@@ -8,7 +8,7 @@ Please notice this module is still under construction.
 This module will be maintained by www.ambersive.com
 
 ### Version
-0.0.5.1
+0.0.5.2
 
 ### Installation
 
@@ -92,15 +92,19 @@ angular.module('app').controller('DemoController', function($scope, DB) {
        console.log(arguments);
     };
 
+    var queryStringParams = {
+        action:'copy'
+    };
+
     DB('Github').$has('get').then(function(bResult){
             console.log(bResult);
         },failed);
 
-    DB('Github').get().then(function(result){
+    DB('Github').get(queryStringParams).then(function(result){
         console.log(result);
     },failed);
 
-    DB('Github').get(10).then(function(result){
+    DB('Github').get(10,queryStringParams).then(function(result){
         console.log(result);
     },failed);
 
@@ -112,15 +116,15 @@ angular.module('app').controller('DemoController', function($scope, DB) {
         console.log(result);
     },failed);
 
-    DB('Github').delete(10).then(function(result){
+    DB('Github').delete(10,queryStringParams).then(function(result){
         console.log(result);
     },failed);
 
-    DB('Github').update(10,{}).then(function(result){
+    DB('Github').update(10,{},queryStringParams).then(function(result){
         console.log(result);
     },failed);
 
-    DB('Github').create({}).then(function(result){
+    DB('Github').create({},queryStringParams).then(function(result){
         console.log(result);
     },failed);
 

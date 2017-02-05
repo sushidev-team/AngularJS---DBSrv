@@ -283,7 +283,7 @@
 
                             }
                         }
-
+ 
                         $http(tempParams)
                             .success(function(data,status,headers,config){
                                 deferred.resolve(data,headers);
@@ -317,12 +317,18 @@
 
                         return deferred.promise;
                     },
-                    update:function(id,data){
+                    update:function(id,data,query){
                         var deferred = $q.defer(),
                             params = getParams('put',settingsObj);
 
                         params.url  += '/'+id;
                         params.data = data;
+
+                        if(angular.isDefined(query)){
+
+                            params.params = query;
+
+                        }
 
                         $http(params)
                             .success(function(data,status,headers,config){
