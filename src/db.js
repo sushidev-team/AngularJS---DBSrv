@@ -67,6 +67,7 @@
                     };
 
                     var value = read(storageName);
+
                     if(value === undefined || value === ''){
                         value = read(storageName.toLocaleLowerCase());
                     }
@@ -173,15 +174,17 @@
         }
     ]);
 
+    
+
     angular.module('ambersive.db').factory('DB',['$q','$log','$http','$dbSettings',
         function($q,$log,$http,$dbSettings){
 
-            var callerName = '';
+            var callerName  = '';
 
-            var tempParams = null;
+            var tempParams  = null;
 
-            var routes = {},
-                getParams = function(method,obj){
+            var routes      = {},
+                getParams   = function(method,obj){
 
                     var params = {
                         method:method.toUpperCase()
@@ -414,78 +417,162 @@
                         name = arguments[0];
                     }
 
-                    if(routes[name] === undefined && addParam === false){
- 
-                        /**
-                         * If the first argument is an object the settings-object will be it
-                         */
+                    if(name === '$'){
 
-                        settingsObject = $dbSettings.route(name);
-                        if(settingsObject === undefined || angular.isObject(arguments[0])){
-                            settingsObject = arguments[0];
-                        }
+                        // Methods about the system
 
-                        routes[name] = new Route(settingsObject);
+                        fn = {
 
-                        except  = [];
-                        data    = $dbSettings.route(name);
+                            /***
+                             * Returns the "classes" available
+                             * @returns {Promise}
+                             */
 
-                        if(data === undefined && angular.isObject(arguments[0])){
-                            data = settingsObject;
-                        }
+                            classes: function(){
 
-                        if(data !== undefined && data.except !== undefined){ except = data.except; }
+                                var deferred = $q.defer();
 
-                        if(except.length > 0){
-                            except.forEach(function(value,index){
-                                if(routes[name][value] !== undefined) {
-                                    delete routes[name][value];
+                                var keys     = Object.keys(routes);
+                                var result   = [];
+
+                                angular.forEach(keys,function(item,index){
+
+                                    result.push({key:item});
+
+                                    if(index + 1 === keys.length){
+                                        deferred.resolve(result);
+                                    }
+
+                                });
+
+                                return deferred.promise;
+                            },
+
+                            /***
+                             * Returns the methods for the given "class"
+                             * @param name
+                             * @returns {Promise}
+                             */
+
+                            methods: function(name){
+
+                                var deferred = $q.defer();
+                                var route    = null;
+                                var keys     = [];
+                                var result   = [];
+
+                                if(angular.isDefined(routes[name])){
+
+                                    route = routes[name];
+                                    keys  = Object.keys(route);
+
+                                    angular.forEach(keys,function(item,index){
+
+                                        if(item.substr(0,1) !== '$') {
+
+                                            result.push({key: item});
+
+                                        }
+
+                                        if(index + 1 === keys.length){
+                                            deferred.resolve(result);
+                                        }
+
+                                    });
+
+                                } else {
+
+                                    deferred.reject(result);
+
                                 }
-                            });
-                        }
 
-                    } else if (addParam === true){
+                                return deferred.promise;
 
-                        settingsObject = $dbSettings.route(name);
-                        if(settingsObject === undefined || angular.isObject(arguments[0])){
-                            settingsObject = arguments[0];
-                        }
+                            }
 
-                        except = [];
-                        data = $dbSettings.route(name);
+                        };
 
+                    }
+                    else {
 
-                        if(data === undefined && angular.isObject(arguments[0])){
-                            data = settingsObject;
-                        }
+                        if (routes[name] === undefined && addParam === false) {
 
-                        if(routes[name] === undefined){
+                            /**
+                             * If the first argument is an object the settings-object will be it
+                             */
 
-                            routes[name] = new Route(data);
+                            settingsObject = $dbSettings.route(name);
+                            if (settingsObject === undefined || angular.isObject(arguments[0])) {
+                                settingsObject = arguments[0];
+                            }
 
-                            if(data !== undefined && data.except !== undefined){ except = data.except; }
+                            routes[name] = new Route(settingsObject);
 
-                            if(except.length > 0){
-                                except.forEach(function(value,index){
-                                    if(routes[name][value] !== undefined) {
+                            except = [];
+                            data = $dbSettings.route(name);
+
+                            if (data === undefined && angular.isObject(arguments[0])) {
+                                data = settingsObject;
+                            }
+
+                            if (data !== undefined && data.except !== undefined) {
+                                except = data.except;
+                            }
+
+                            if (except.length > 0) {
+                                except.forEach(function (value, index) {
+                                    if (routes[name][value] !== undefined) {
                                         delete routes[name][value];
                                     }
                                 });
                             }
 
+                        } else if (addParam === true) {
+
+                            settingsObject = $dbSettings.route(name);
+                            if (settingsObject === undefined || angular.isObject(arguments[0])) {
+                                settingsObject = arguments[0];
+                            }
+
+                            except = [];
+                            data = $dbSettings.route(name);
+
+
+                            if (data === undefined && angular.isObject(arguments[0])) {
+                                data = settingsObject;
+                            }
+
+                            if (routes[name] === undefined) {
+
+                                routes[name] = new Route(data);
+
+                                if (data !== undefined && data.except !== undefined) {
+                                    except = data.except;
+                                }
+
+                                if (except.length > 0) {
+                                    except.forEach(function (value, index) {
+                                        if (routes[name][value] !== undefined) {
+                                            delete routes[name][value];
+                                        }
+                                    });
+                                }
+
+                            }
+
                         }
 
+                        if (angular.isObject(arguments[0]) && arguments[0].name !== undefined && arguments[0].fnName !== undefined) {
+                            routes[name][arguments[0].fnName] = arguments[0].fn;
+                        }
+
+                        // return the route
+
+                        callerName = name;
+
+                        fn = routes[name];
+
                     }
-
-                    if(angular.isObject(arguments[0]) && arguments[0].name !== undefined && arguments[0].fnName !== undefined){
-                        routes[name][arguments[0].fnName] = arguments[0].fn;
-                    }
-
-                    // return the route
-
-                    callerName = name;
-
-                    fn = routes[name];
 
                 } else {
                     $log.warn('Please define a Service');

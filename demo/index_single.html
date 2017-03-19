@@ -34,6 +34,13 @@
                         $scope.getData2 = result;
                     },failed);
 
+                    DB('$').classes().then(function (result) {
+                        console.error(result);
+                    });
+
+                    DB('$').methods('Github').then(function (result) {
+                        console.error(result);
+                    });
 
                 });
 

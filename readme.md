@@ -8,7 +8,7 @@ Please notice this module is still under construction.
 This module will be maintained by www.ambersive.com
 
 ### Version
-0.0.5.2
+0.0.6.0
 
 ### Installation
 
@@ -126,6 +126,16 @@ angular.module('app').controller('DemoController', function($scope, DB) {
 
     DB('Github').create({},queryStringParams).then(function(result){
         console.log(result);
+    },failed);
+
+    // SYSTEM methods
+
+    DB('$').classes().then(function(result){
+       console.log(result);
+    },failed);
+
+    DB('$').methods('Github').then(function(result){
+           console.log(result);
     },failed);
 
 });
