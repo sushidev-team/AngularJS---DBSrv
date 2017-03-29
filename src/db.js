@@ -23,6 +23,7 @@
                         tokenType   = $dbSettings.tokenType,
                         tokenData   = null,
                         langData    = null,
+                        langName    = $dbSettings.langName,
                         fn          = function(config){
                             deferred.resolve(config);
                         };
@@ -33,19 +34,17 @@
 
                     if(typeof(Storage) !== "undefined") {
                         tokenData = localStorage.getItem(storageName);
-                        langData = localStorage.getItem(storageLang);
+                        langData  = localStorage.getItem(storageLang);
                     } else {
                         $log.warn('ambersive.db: this browser doesn\'t support localStorage');
                     }
-
-
 
                     config.headers[tokenName]   = tokenType+' '+tokenData;
 
                     if(langData !== null) {
 
                         config.headers['Accept-Language']        = langData;
-                        config.headers['X-Accept-Language']        = langData;
+                        config.headers[langName]                 = langData;
 
                     }
 
@@ -87,6 +86,7 @@
 
             var langData = null;
             var storageLang = $dbSettingsProvider.$get().storageLang;
+            var langName    = $dbSettingsProvider.$get().langName;
 
             $httpProvider.interceptors.push('authenticationInjector');
 
@@ -97,6 +97,7 @@
                 if(langData !== null) {
 
                     $httpProvider.defaults.headers.common["Accept-Language"] = langData;
+                    $httpProvider.defaults.headers.common[langName]          = langData;
 
                 }
 
@@ -114,6 +115,7 @@
                 storageLang     = 'language',
                 tokenType       = 'Bearer',
                 tokenName       = 'Authorization',
+                langName        = 'Language',
                 databaseName    = 'AMBERSIVE.DB',
                 routes          = {};
 
@@ -187,6 +189,7 @@
                         storageLang:storageLang,
                         tokenName:tokenName,
                         tokenType:tokenType,
+                        langName:langName,
                         databaseName:databaseName
                     };
                 }
