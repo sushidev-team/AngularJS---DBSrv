@@ -38,11 +38,14 @@
                         $log.warn('ambersive.db: this browser doesn\'t support localStorage');
                     }
 
+
+
                     config.headers[tokenName]   = tokenType+' '+tokenData;
 
                     if(langData !== null) {
 
-                        config.headers['Accept-Language'] = langData;
+                        config.headers['Accept-Language']        = langData;
+                        config.headers['X-Accept-Language']        = langData;
 
                     }
 
@@ -79,9 +82,26 @@
         }
     ]);
 
-    angular.module('ambersive.db').config(['$httpProvider',
-        function($httpProvider) {
+    angular.module('ambersive.db').config(['$httpProvider','$dbSettingsProvider',
+        function($httpProvider,$dbSettingsProvider) {
+
+            var langData = null;
+            var storageLang = $dbSettingsProvider.$get().storageLang;
+
             $httpProvider.interceptors.push('authenticationInjector');
+
+            if(typeof(Storage) !== "undefined") {
+
+                langData = localStorage.getItem(storageLang);
+
+                if(langData !== null) {
+
+                    $httpProvider.defaults.headers.common["Accept-Language"] = langData;
+
+                }
+
+            }
+
         }
     ]);
 
@@ -173,8 +193,6 @@
             };
         }
     ]);
-
-    
 
     angular.module('ambersive.db').factory('DB',['$q','$log','$http','$dbSettings',
         function($q,$log,$http,$dbSettings){
