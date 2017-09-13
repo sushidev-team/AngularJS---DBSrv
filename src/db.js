@@ -7,14 +7,188 @@
 
 (function(window, document, undefined) {
 
-    'use strict';
+    var AmbersiveDBRegisterStack                = [];
+    var AmbersiveDBRegisterStackIds             = [];
+    var AmbersiveDBRegisterstackRegister        = [];
+    var AmbersiveDBRegisterstackRegisterDb      = [];
+    var AmbersiveDBRegisterstackRegisterDbIds   = [];
+
+    var AmbersiveDBRegisterSrv                  = {
+
+        /***
+         * $http config to string
+         * @param config
+         * @returns {string}
+         */
+
+        toId:       function(config){
+
+            var params          = [];
+
+            var req_params      = [];
+            var req_param       = null;
+
+            params.push(config.method);
+            params.push(config.url);
+
+            if(angular.isDefined(config.params)){
+
+                // Add the params
+
+                for(req_param in config.params){
+
+                    req_params.push(req_param + '=' + config.params[req_param]);
+
+                }
+
+                params.push('?' + req_params.join('&'));
+
+            }
+
+            if(angular.isDefined(config.data)){
+
+                if(angular.isObject(config.data)) {
+
+                    try {
+
+                        params.push(JSON.stringify(config.data));
+
+                    } catch(err){
+
+                        console.error(err);
+
+                    }
+
+                }
+
+            }
+
+            return params.join('::');
+
+        },
+
+        /***
+         * Generate a unique id
+         * @param length
+         * @param prefix
+         * @returns {string}
+         */
+
+        getUnique:   function(length,prefix){
+
+            if(prefix === undefined){
+                prefix = '';
+            }
+
+            if(length === undefined){
+                length = 16;
+            }
+
+            return prefix + (Math.random().toString(length).slice(2));
+
+        },
+
+        /***
+         * Returns if all calls from the api are done
+         * @returns {boolean}
+         */
+
+        finished: function(){
+
+            if(AmbersiveDBRegisterStack.length === 0){
+                return true;
+            }
+
+            return false;
+
+        }
+
+    };
 
     angular.module('ambersive.db',[]);
+
+    angular.module('ambersive.db').factory('DBRegister',[
+        function(){
+
+            return AmbersiveDBRegisterSrv;
+
+        }
+    ]);
+
+    angular.module('ambersive.db').factory('DBHelper', ['$http', '$q','$rootScope',
+        function ($http, $q, $rootScope) {
+
+            var DBHelper            = {};
+            var DBHelperRegister    = [];
+            var DBHelperRegisterIds = [];
+
+            /***
+             * Execute the $http call with extra functionality (like last call detection and http stop)
+             * @param httpObj
+             * @returns {Promise}
+             */
+
+            DBHelper.execute    =         function(httpObj){
+
+                var id          = AmbersiveDBRegisterSrv.toId(httpObj);
+                var index       = DBHelperRegisterIds.indexOf(id);
+
+                var deferred    = $q.defer();
+                var regElement  = null;
+
+                httpObj.timeout = deferred.promise;
+
+                regElement = $http(httpObj)
+                    .success(function(data,status,headers,config){
+
+                        if(config.isLastCall === true && data !== null) {
+                            deferred.resolve(data, config.isLast);
+                        }
+
+                    })
+                    .error(function(data,status,headers,config){
+
+                        if(data !== null && config.isLastCall === true){
+                            deferred.reject(data, config.isLast);
+                        }
+
+                    });
+
+                regElement.abort = function(){
+                    deferred.resolve(null);
+                };
+
+                if(index > -1){
+
+                    // Abort
+
+                    DBHelperRegister[index].abort();
+
+                    DBHelperRegister[index]     = regElement;
+                    DBHelperRegisterIds[index]  = id;
+
+                }
+                else {
+
+                    DBHelperRegister.push(regElement);
+                    DBHelperRegisterIds.push(id);
+
+                }
+
+                return deferred.promise;
+
+            };
+
+            return DBHelper;
+
+        }
+    ]);
+
 
     angular.module('ambersive.db').factory('authenticationInjector', ['$injector', '$q','$log','$dbSettings','$timeout',
         function ($injector, $q,$log,$dbSettings,$timeout) {
             var authenticationInjector = {
-                request: function (config) {
+                'request':  function (config) {
 
                     var deferred    = $q.defer(),
                         storageName = $dbSettings.storageName,
@@ -81,14 +255,99 @@
         }
     ]);
 
+    angular.module('ambersive.db').factory('ambersiveDbInjector', ['$injector', '$q','$log','DBRegister','$rootScope',
+        function ($injector, $q,$log,DBRegister,$rootScope) {
+
+            var ambersiveDbInjector = {
+                'request':  function (config) {
+
+                    var deferred            = $q.defer();
+                    var status              = false;
+
+                    var id                  = AmbersiveDBRegisterSrv.toId(config);
+                    var index               = null;
+
+                    var reqId               = DBRegister.getUnique(32);
+                    var reqEle              = {};
+
+                    var defResolve          = null;
+
+                    var headerIdentifier1   = 'X-Req-ID';
+                    var headerIdentifier2   = 'Req-ID';
+
+                    var fn                  = function(config){
+                        deferred.resolve(config);
+                    };
+
+                    index                   = AmbersiveDBRegisterStack.indexOf(id);
+
+                    config.headers[headerIdentifier1]    = reqId;
+                    config.headers[headerIdentifier2]    = reqId;
+
+                    config.reqID                         = reqId;
+
+                    reqEle = {
+                        config:     config,
+                        deferred:   deferred,
+                        reqId:      reqId,
+                        id:         id
+                    };
+
+                    if(index > -1){
+
+                        // Found stack
+
+                        AmbersiveDBRegisterStackIds[index]      = reqId;
+                        AmbersiveDBRegisterstackRegister[index] = reqEle;
+
+                    } else {
+
+                        AmbersiveDBRegisterStack.push(id);
+                        AmbersiveDBRegisterStackIds.push(reqId);
+                        AmbersiveDBRegisterstackRegister.push(reqEle);
+
+                    }
+
+                    if(angular.isDefined(status) === true){
+
+                        fn(config);
+
+                    }
+
+                    return deferred.promise;
+                },
+                'response': function(response) {
+
+                    var index           = AmbersiveDBRegisterStackIds.indexOf(response.config.reqID);
+
+                    response.config.isLastCall = false;
+
+                    if(index > -1){
+
+                        AmbersiveDBRegisterStackIds.splice(index,1);
+                        AmbersiveDBRegisterstackRegister.splice(index,1);
+
+                        response.config.isLastCall = true;
+
+                    }
+
+                    return response;
+
+                }
+            };
+            return ambersiveDbInjector;
+        }
+    ]);
+
     angular.module('ambersive.db').config(['$httpProvider','$dbSettingsProvider',
         function($httpProvider,$dbSettingsProvider) {
 
-            var langData = null;
-            var storageLang = $dbSettingsProvider.$get().storageLang;
+            var langData    = null;
             var langName    = $dbSettingsProvider.$get().langName;
+            var storageLang = $dbSettingsProvider.$get().storageLang;
 
             $httpProvider.interceptors.push('authenticationInjector');
+            $httpProvider.interceptors.push('ambersiveDbInjector');
 
             if(typeof(Storage) !== "undefined") {
 
@@ -172,14 +431,14 @@
             // Getter
 
             return {
-                register:registerRoute,
-                setBaseUrl:setBaseUrl,
-                setContentType:setContentType,
-                setTokenAttribute:setTokenAttribute,
-                setStorageName:setStorageName,
-                setStorageLang:setStorageLang,
-                setDatabaseName:setDatabaseName,
-                $get: function () {
+                register:               registerRoute,
+                setBaseUrl:             setBaseUrl,
+                setContentType:         setContentType,
+                setTokenAttribute:      setTokenAttribute,
+                setStorageName:         setStorageName,
+                setStorageLang:         setStorageLang,
+                setDatabaseName:        setDatabaseName,
+                $get:                   function () {
                     return {
                         baseUrl:baseUrl,
                         contentType:contentType,
@@ -197,8 +456,8 @@
         }
     ]);
 
-    angular.module('ambersive.db').factory('DB',['$q','$log','$http','$dbSettings',
-        function($q,$log,$http,$dbSettings){
+    angular.module('ambersive.db').factory('DB',['$q','$log','$http','$dbSettings','DBRegister','DBHelper',
+        function($q,$log,$http,$dbSettings,DBRegister,DBHelper){
 
             var callerName  = '';
 
@@ -231,7 +490,7 @@
 
                     switch(method){
                         default:
-                            params.url = baseUrl+seperator+url;
+                            params.url = baseUrl + seperator+url;
                             break;
                     }
 
@@ -249,8 +508,22 @@
 
                 };
 
+            /***
+             * Route informations
+             * @param settingsObj
+             * @returns {{$has: DB.$has, get: DB.get, getById: DB.getById, update: DB.update, create: DB.create, delete: DB.delete}}
+             * @constructor
+             */
+
             var Route = function(settingsObj){
                 return {
+
+                    /***
+                     * Helper method for checking if a DB API has a method
+                     * @param name
+                     * @returns {Promise}
+                     */
+
                     $has:function(name){
 
                         var deferred = $q.defer();
@@ -264,32 +537,52 @@
                         return deferred.promise;
 
                     },
-                    get:function(query){
-                        var deferred = $q.defer();
 
-                        tempParams = getParams('get',settingsObj);
+                    /***
+                     * Get api request
+                     * @param query
+                     * @returns {Promise}
+                     */
+
+                    get:function(query){
+
+                        var deferred    = $q.defer();
+                        tempParams      = getParams('get',settingsObj);
 
                         if(angular.isDefined(query)){
 
                             tempParams.params = query;
 
                         }
- 
-                        $http(tempParams)
-                            .success(function(data,status,headers,config){
-                                deferred.resolve(data,headers);
-                            })
-                            .error(function(data,status,headers,config){
-                                deferred.reject(data,headers);
-                            });
+
+                        DBHelper.execute(tempParams).then(
+                            function(result){
+                                if(result !== null) {
+                                    deferred.resolve(result);
+                                }
+                            },
+                            function(errorResult){
+                                if(result !== null) {
+                                    deferred.reject(errorResult);
+                                }
+                            }
+                        );
 
                         return deferred.promise;
                     },
+
+                    /***
+                     * Get a single entry
+                     * @param id
+                     * @param query
+                     * @returns {Promise}
+                     */
+
                     getById:function(id,query){
-                        var deferred = $q.defer();
 
-                        tempParams = getParams('get',settingsObj);
+                        var deferred    = $q.defer();
 
+                        tempParams      = getParams('get',settingsObj);
                         tempParams.url += '/'+id;
 
                         if(angular.isDefined(query)){
@@ -298,22 +591,38 @@
 
                         }
 
-                        $http(tempParams)
-                            .success(function(data,status,headers,config){
-                                deferred.resolve(data,headers);
-                            })
-                            .error(function(data,status,headers,config){
-                                deferred.reject(data,headers);
-                            });
+                        DBHelper.execute(tempParams).then(
+                            function(result){
+                                if(result !== null) {
+                                    deferred.resolve(result);
+                                }
+                            },
+                            function(errorResult){
+                                if(result !== null) {
+                                    deferred.reject(errorResult);
+                                }
+                            }
+                        );
 
                         return deferred.promise;
+
                     },
+
+                    /***
+                     * Update a single entry
+                     * @param id
+                     * @param data
+                     * @param query
+                     * @returns {Promise}
+                     */
+
                     update:function(id,data,query){
-                        var deferred = $q.defer(),
-                            params = getParams('put',settingsObj);
 
-                        params.url  += '/'+id;
-                        params.data = data;
+                        var deferred    = $q.defer(),
+                            params      = getParams('put',settingsObj);
+
+                        params.url      += '/'+id;
+                        params.data     = data;
 
                         if(angular.isDefined(query)){
 
@@ -321,21 +630,36 @@
 
                         }
 
-                        $http(params)
-                            .success(function(data,status,headers,config){
-                                deferred.resolve(data);
-                            })
-                            .error(function(data,status,headers,config){
-                                deferred.reject(data);
-                            });
+                        DBHelper.execute(params).then(
+                            function(result){
+                                if(result !== null) {
+                                    deferred.resolve(result);
+                                }
+                            },
+                            function(errorResult){
+                                if(result !== null) {
+                                    deferred.reject(errorResult);
+                                }
+                            }
+                        );
 
                         return deferred.promise;
+
                     },
+
+                    /***
+                     * Create a new entry
+                     * @param data
+                     * @param query
+                     * @returns {Promise}
+                     */
+
                     create:function(data,query){
-                        var deferred = $q.defer(),
-                            params = getParams('post',settingsObj);
 
-                        params.data = data;
+                        var deferred    = $q.defer(),
+                            params      = getParams('post',settingsObj);
+
+                        params.data     = data;
 
                         if(angular.isDefined(query)){
 
@@ -343,17 +667,32 @@
 
                         }
 
-                        $http(params)
-                            .success(function(data,status,headers,config){
-                                deferred.resolve(data);
-                            })
-                            .error(function(data,status,headers,config){
-                                deferred.reject(data);
-                            });
+                        DBHelper.execute(params).then(
+                            function(result){
+                                if(result !== null) {
+                                    deferred.resolve(result);
+                                }
+                            },
+                            function(errorResult){
+                                if(result !== null) {
+                                    deferred.reject(errorResult);
+                                }
+                            }
+                        );
 
                         return deferred.promise;
+
                     },
+
+                    /***
+                     * Delete an entry
+                     * @param id
+                     * @param query
+                     * @returns {Promise}
+                     */
+
                     delete:function(id,query){
+
                         var deferred = $q.defer(),
                             params = getParams('delete',settingsObj);
 
@@ -367,16 +706,26 @@
 
                         $http(params)
                             .success(function(data,status,headers,config){
-                                deferred.resolve(data);
+                                if(config.isLastCall === true) {
+                                    deferred.resolve(data);
+                                }
                             })
                             .error(function(data,status,headers,config){
-                                deferred.reject(data);
+                                if(config.isLastCall === true) {
+                                    deferred.reject(data);
+                                }
                             });
 
                         return deferred.promise;
                     }
                 };
             };
+
+            /***
+             * Main DB - API function
+             * @returns {*}
+             * @constructor
+             */
 
             var DBSrv = function(){
 
@@ -386,9 +735,9 @@
                     data,
                     settingsObject;
 
+                var addParam = false;
+
                 if(arguments.length > 0){
- 
-                    var addParam = false;
 
                     // First parameter should be the name
 
@@ -423,15 +772,24 @@
                                 var keys     = Object.keys(routes);
                                 var result   = [];
 
-                                angular.forEach(keys,function(item,index){
+                                var i        = 0;
+                                var l        = 0;
 
-                                    result.push({key:item});
+                                if(angular.isDefined(keys) === true) {
 
-                                    if(index + 1 === keys.length){
-                                        deferred.resolve(result);
-                                    }
+                                    l = keys.length;
 
-                                });
+                                }
+
+                                for(i = 0; i < l; i += 1){
+
+                                    result.push({key:keys[i]});
+
+                                }
+
+                                if(angular.isDefined(result)){
+                                    deferred.resolve(result);
+                                }
 
                                 return deferred.promise;
                             },
@@ -449,24 +807,29 @@
                                 var keys     = [];
                                 var result   = [];
 
+                                var i        = 0;
+                                var l        = 0;
+
                                 if(angular.isDefined(routes[name])){
 
                                     route = routes[name];
                                     keys  = Object.keys(route);
 
-                                    angular.forEach(keys,function(item,index){
+                                    if(angular.isDefined(keys) === true) {
 
-                                        if(item.substr(0,1) !== '$') {
+                                        l = keys.length;
 
-                                            result.push({key: item});
+                                    }
 
+                                    for(i = 0; i < l; i += 1){
+
+                                        if(keys[i].substr(0,1) === '$'){
+                                            result.push({key:keys[i]});
                                         }
 
-                                        if(index + 1 === keys.length){
-                                            deferred.resolve(result);
-                                        }
+                                    }
 
-                                    });
+                                    deferred.resolve(result);
 
                                 } else {
 
@@ -496,8 +859,8 @@
 
                             routes[name] = new Route(settingsObject);
 
-                            except = [];
-                            data = $dbSettings.route(name);
+                            except  = [];
+                            data    = $dbSettings.route(name);
 
                             if (data === undefined && angular.isObject(arguments[0])) {
                                 data = settingsObject;
@@ -522,9 +885,8 @@
                                 settingsObject = arguments[0];
                             }
 
-                            except = [];
-                            data = $dbSettings.route(name);
-
+                            except  = [];
+                            data    = $dbSettings.route(name);
 
                             if (data === undefined && angular.isObject(arguments[0])) {
                                 data = settingsObject;
@@ -557,8 +919,7 @@
                         // return the route
 
                         callerName = name;
-
-                        fn = routes[name];
+                        fn         = routes[name];
 
                     }
 

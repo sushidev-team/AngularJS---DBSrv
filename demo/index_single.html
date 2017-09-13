@@ -10,6 +10,7 @@
     <script>
 
         angular.module('app', ['ambersive.db'])
+
                 .config(['$dbSettingsProvider',
                     function ($dbSettingsProvider) {
 
@@ -20,27 +21,60 @@
 
                     }
                 ])
-                .controller('DemoController',function($scope,DB,REST,$q,$timeout){
+                .run(['DB','DBHelper','$q',
+                    function (DB,DBHelper,$q) {
+
+                        DB(
+                            {
+                                name:'Github',
+                                fnName:'test',
+                                fn:function(params){
+
+                                    // Defining the actual action
+
+                                    var deferred = $q.defer(),
+                                        httpObj  = {method:'GET',url:'http://jsonplaceholder.typicode.com/posts',params:params};
+
+                                    DBHelper.execute(httpObj).then(
+                                        function(data,status,headers,config){
+                                            deferred.resolve(data,headers);
+                                        },
+                                        function(data,status,headers,config){
+                                            deferred.reject(data,headers);
+                                        }
+                                    );
+
+                                    return deferred.promise;
+                                }
+                            }, true
+                        );
+
+                    }
+                ])
+                .controller('DemoController',function($scope,DB,REST,$q,$timeout,$http){
 
                     var failed = function(data){
                         console.log(arguments);
                     };
 
-                    DB('Github').get({page:1,test:'Schüssel'}).then(function(result){
-                        $scope.getData = result;
-                    },failed);
+                    var i      = 0;
+                    var l      = 2;
 
-                    DB('Github2').get(10,{page:1}).then(function(result){
-                        $scope.getData2 = result;
-                    },failed);
+                    console.warn('RUN TEST');
 
-                    DB('$').classes().then(function (result) {
-                        console.error(result);
-                    });
+                    for(i = 0; i < l; i += 1) {
 
-                    DB('$').methods('Github').then(function (result) {
-                        console.error(result);
-                    });
+                        console.log('Make call ' + (i + 1));
+
+                        DB('Github').test({page: 1, test: 'Schüssel'}).then(function (result) {
+                            $scope.getData = result;
+
+                            console.log('Ergebnis: ' + (i + 1));
+                            console.log(result);
+
+                        }, failed);
+
+                    }
 
                 });
 

@@ -1,14 +1,19 @@
 # RESTful (Version 2) - AngularJS Service
 
-An AngularJS (1.5) service for using simple useage of RESTful Webservices with an build-in auto-mechanism for detecting access tokens.
+An AngularJS (1.5+) service for using simple useage of RESTful Webservices with an build-in auto-mechanism for detecting access tokens.
 With this module you can access the RESTful API in a readable way.
 
-Please notice this module is still under construction.
+This module also includes also an automation for canceling previous api requests if a new api call with the same data is triggered before the old request is resolved. 
+For this feature you need to use the DBHelper Service (wrapper with extra functions for $http) included in this package.
+
+Otherwise the request will be made but the older related promise won't be resolved cause every request will get an request-ID. If the request ID does not belong to the latest call the promise will not be resolved at all (even errors).
+
+Please be aware that the standard declarations for get/post/put/delete are based an this DBHelper.execute method.
 
 This module will be maintained by www.ambersive.com
 
 ### Version
-0.0.6.3
+1.0.0
 
 ### Installation
 
@@ -78,6 +83,81 @@ You can check if a function exists with the $has(name)
 
     }
  ]);
+
+```
+
+### Definig an Api (with DBHelper)
+
+This declaration also includes automatic api $http cancelation for api calls.
+
+```sh
+
+ angular.module('moduleName').run(['DB','$q','DBHelper',
+     function(DB,$q,DBHelper){
+     
+         // Register the api call an run
+  
+         DB({
+             name:'Github',
+             fnName:'test',
+             fn:function(params){
+         
+                 // Defining the actual action
+         
+                 var deferred = $q.defer(),
+                     httpObj  = {method:'GET',url:'http://jsonplaceholder.typicode.com/posts',params:params};
+         
+                 DBHelper.execute(httpObj).then(
+                     function(data,status,headers,config){
+                         deferred.resolve(data,headers);
+                     },
+                     function(data,status,headers,config){
+                         deferred.reject(data,headers);
+                     }
+                 );
+         
+                 return deferred.promise;
+             }
+        }, true
+    
+    }
+]);  
+
+### Definig an Api (without DBHelper)
+
+```sh
+
+ angular.module('moduleName').run(['DB', '$http', '$q',
+     function(DB, $http, $q){
+     
+         // Register the api call an run
+  
+         DB(
+             {
+                 name:'API NAME',
+                 fnName:'METHODNAME',
+                 fn:function(data){
+                 
+                    // Defining the actual action
+ 
+                     var deferred = $q.defer(),
+                         params   = {method:'GET',url:'URL GOES HER'};
+ 
+                     $http(params)
+                         .success(function(data,status,headers,config){
+                             deferred.resolve(data,headers);
+                         })
+                         .error(function(data,status,headers,config){
+                             deferred.reject(data,headers);
+                         });
+ 
+                     return deferred.promise;
+                 }
+             }, true
+         );
+    
+    }
+]);         
 
 ```
 
