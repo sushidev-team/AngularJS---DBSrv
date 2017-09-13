@@ -134,46 +134,76 @@
                 var index       = DBHelperRegisterIds.indexOf(id);
 
                 var deferred    = $q.defer();
-                var regElement  = null;
 
-                httpObj.timeout = deferred.promise;
+                var callFn      = function(httpParams){
 
-                regElement = $http(httpObj)
-                    .success(function(data,status,headers,config){
+                    var defer           = $q.defer();
+                    var regElement      = null;
 
-                        if(config.isLastCall === true && data !== null) {
-                            deferred.resolve(data, config.isLast);
-                        }
+                    httpParams.timeout  = defer.promise;
 
-                    })
-                    .error(function(data,status,headers,config){
+                    regElement          = $http(httpParams)
+                        .success(function(data,status,headers,config){
 
-                        if(data !== null && config.isLastCall === true){
-                            deferred.reject(data, config.isLast);
-                        }
+                            if(data !== null && config.isLastCall === true) {
+                                defer.resolve(data, config.isLastCall);
+                            }
 
-                    });
+                        })
+                        .error(function(data,status,headers,config){
 
-                regElement.abort = function(){
-                    deferred.resolve(null);
+                            if(data !== null && config.isLastCall === true){
+                                defer.reject(data, config.isLast);
+                            }
+
+                        });
+
+                    regElement.abort = function(){
+                        defer.resolve(null,regElement);
+                    };
+
+                    /***
+                     * Abort a previous api call if the same api call is made now
+                     */
+
+                    if(index > -1){
+
+                        // Abort
+
+                        DBHelperRegister[index].abort();
+
+                        DBHelperRegister[index]     = regElement;
+                        DBHelperRegisterIds[index]  = id;
+
+                    }
+                    else {
+
+                        DBHelperRegister.push(regElement);
+                        DBHelperRegisterIds.push(id);
+
+                    }
+
+                    return defer.promise;
+
                 };
 
-                if(index > -1){
+                /***
+                 * Call the api in a seperat promise
+                 * to provide the possiblity to abort previous api calls
+                 */
 
-                    // Abort
-
-                    DBHelperRegister[index].abort();
-
-                    DBHelperRegister[index]     = regElement;
-                    DBHelperRegisterIds[index]  = id;
-
-                }
-                else {
-
-                    DBHelperRegister.push(regElement);
-                    DBHelperRegisterIds.push(id);
-
-                }
+                callFn(httpObj).then(
+                    function(result){
+                        if(result !== null){
+                            deferred.resolve(result);
+                        }
+                    },
+                    function(errorResult){
+                        if(errorResult !== null){
+                            deferred.reject(result);
+                        }
+                    }
+                );
 
                 return deferred.promise;
 

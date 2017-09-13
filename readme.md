@@ -13,7 +13,7 @@ Please be aware that the standard declarations for get/post/put/delete are based
 This module will be maintained by www.ambersive.com
 
 ### Version
-1.0.0
+1.0.0.2
 
 ### Installation
 

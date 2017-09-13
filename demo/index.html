@@ -25,7 +25,7 @@
                         console.log(arguments);
                     };
 
-                    DB('Github').get({page:1}).then(function(result){
+                    DB('Github').get({page:x}).then(function(result){
                         $scope.getData = result;
                     },failed);
 

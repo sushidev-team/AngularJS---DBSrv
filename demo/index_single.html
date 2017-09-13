@@ -37,10 +37,14 @@
 
                                     DBHelper.execute(httpObj).then(
                                         function(data,status,headers,config){
-                                            deferred.resolve(data,headers);
+                                            if(data !== null) {
+                                                deferred.resolve(data, headers);
+                                            }
                                         },
                                         function(data,status,headers,config){
-                                            deferred.reject(data,headers);
+                                            if(data !== null) {
+                                                deferred.reject(data, headers);
+                                            }
                                         }
                                     );
 
@@ -57,24 +61,30 @@
                         console.log(arguments);
                     };
 
-                    var i      = 0;
-                    var l      = 2;
+                    $scope.do = function(){
 
-                    console.warn('RUN TEST');
+                        var i      = 0;
+                        var l      = 10;
 
-                    for(i = 0; i < l; i += 1) {
+                        console.warn('RUN TEST');
 
-                        console.log('Make call ' + (i + 1));
+                        for(i = 0; i < l; i += 1) {
 
-                        DB('Github').test({page: 1, test: 'Schüssel'}).then(function (result) {
-                            $scope.getData = result;
+                            console.log('Make call ' + (i + 1));
 
-                            console.log('Ergebnis: ' + (i + 1));
-                            console.log(result);
+                            DB('Github').test({page: 1, test: 'Schüssel'}).then(function (result) {
+                                $scope.getData = result;
 
-                        }, failed);
+                                console.log('Ergebnis: ' + (i + 1));
+                                console.log(result);
 
-                    }
+                            }, failed);
+
+                        }
+
+                    };
+
+                    $scope.do();
 
                 });
 
@@ -87,6 +97,7 @@
             <div class="row">
                 <div class="col-xs-12 col-sm-12">
                     <h2>Get-Data</h2>
+                    <button ng-click="do()">Daten abrufen</button>
                     <pre style="height: 100px;overflow-y:scroll;border:1px solid #ddd;">{{getData}}</pre>
                 </div>
             </div>
