@@ -122,13 +122,25 @@
             var DBHelperRegister    = [];
             var DBHelperRegisterIds = [];
 
+            DBHelper.isOnline   = function(){
+
+                if(angular.isDefined(navigator)  === true && angular.isDefined(navigator.onLine) === true){
+
+                    return navigator.onLine;
+
+                }
+
+                return true;
+
+            };
+
             /***
              * Execute the $http call with extra functionality (like last call detection and http stop)
              * @param httpObj
              * @returns {Promise}
              */
 
-            DBHelper.execute    =         function(httpObj){
+            DBHelper.execute    =         function(httpObj,offlineSettings){
 
                 var id          = AmbersiveDBRegisterSrv.toId(httpObj);
                 var index       = DBHelperRegisterIds.indexOf(id);
@@ -140,19 +152,49 @@
                     var defer           = $q.defer();
                     var regElement      = null;
 
+                    // Check if the application is int the internet
+
+                    if(DBHelper.isOnline() === false){
+
+                        // Run custom offline logic here
+
+                        if(angular.isDefined(offlineSettings) === true){
+
+                           // Run the custom logic
+
+                           if(angular.isDefined(offlineSettings.fn) === true && angular.isFunction(offlineSettings.fn) === true){
+
+                                offlineSettings.fn(defer,index,DBHelperRegister);
+
+                           }
+
+                           // Check if the call should stop here
+
+                            if(angular.isDefined(offlineSettings.stop) && offlineSettings.stop === true){
+
+                                return defer.promise;
+
+                            }
+
+                        }
+
+                    }
+
+                    // Standard api call action
+
                     httpParams.timeout  = defer.promise;
 
                     regElement          = $http(httpParams)
                         .success(function(data,status,headers,config){
 
-                            if(data !== null && config.isLastCall === true) {
+                            if(data !== null) {
                                 defer.resolve(data, config.isLastCall);
                             }
 
                         })
                         .error(function(data,status,headers,config){
 
-                            if(data !== null && config.isLastCall === true){
+                            if(data !== null){
                                 defer.reject(data, config.isLast);
                             }
 
@@ -587,14 +629,10 @@
 
                         DBHelper.execute(tempParams).then(
                             function(result){
-                                if(result !== null) {
-                                    deferred.resolve(result);
-                                }
+                                deferred.resolve(result);
                             },
                             function(errorResult){
-                                if(result !== null) {
-                                    deferred.reject(errorResult);
-                                }
+                                deferred.reject(errorResult);
                             }
                         );
 
@@ -623,14 +661,10 @@
 
                         DBHelper.execute(tempParams).then(
                             function(result){
-                                if(result !== null) {
-                                    deferred.resolve(result);
-                                }
+                                deferred.resolve(result);
                             },
                             function(errorResult){
-                                if(result !== null) {
-                                    deferred.reject(errorResult);
-                                }
+                                deferred.reject(errorResult);
                             }
                         );
 
@@ -660,16 +694,12 @@
 
                         }
 
-                        DBHelper.execute(params).then(
+                        DBHelper.execute(tempParams).then(
                             function(result){
-                                if(result !== null) {
-                                    deferred.resolve(result);
-                                }
+                                deferred.resolve(result);
                             },
                             function(errorResult){
-                                if(result !== null) {
-                                    deferred.reject(errorResult);
-                                }
+                                deferred.reject(errorResult);
                             }
                         );
 
@@ -697,16 +727,12 @@
 
                         }
 
-                        DBHelper.execute(params).then(
+                        DBHelper.execute(tempParams).then(
                             function(result){
-                                if(result !== null) {
-                                    deferred.resolve(result);
-                                }
+                                deferred.resolve(result);
                             },
                             function(errorResult){
-                                if(result !== null) {
-                                    deferred.reject(errorResult);
-                                }
+                                deferred.reject(errorResult);
                             }
                         );
 
@@ -734,17 +760,14 @@
 
                         }
 
-                        $http(params)
-                            .success(function(data,status,headers,config){
-                                if(config.isLastCall === true) {
-                                    deferred.resolve(data);
-                                }
-                            })
-                            .error(function(data,status,headers,config){
-                                if(config.isLastCall === true) {
-                                    deferred.reject(data);
-                                }
-                            });
+                        $DBHelper.execute(tempParams).then(
+                            function(result){
+                                deferred.resolve(result);
+                            },
+                            function(errorResult){
+                                deferred.reject(errorResult);
+                            }
+                        );
 
                         return deferred.promise;
                     }

@@ -35,7 +35,14 @@
                                     var deferred = $q.defer(),
                                         httpObj  = {method:'GET',url:'http://jsonplaceholder.typicode.com/posts',params:params};
 
-                                    DBHelper.execute(httpObj).then(
+                                    DBHelper.execute(httpObj,{
+                                      fn: function(){
+
+                                          console.error('we are currently offline');
+
+                                      },
+                                      stop:false
+                                    }).then(
                                         function(data,status,headers,config){
                                             if(data !== null) {
                                                 deferred.resolve(data, headers);
