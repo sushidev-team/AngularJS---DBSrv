@@ -91,7 +91,6 @@ You can check if a function exists with the $has(name)
 This declaration also includes automatic api $http cancelation for api calls.
 
 ```sh
-
  angular.module('moduleName').run(['DB','$q','DBHelper',
      function(DB,$q,DBHelper){
      
@@ -122,6 +121,7 @@ This declaration also includes automatic api $http cancelation for api calls.
     
     }
 ]);  
+```
 
 ### Definig an Api (without DBHelper)
 
