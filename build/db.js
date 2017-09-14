@@ -137,7 +137,7 @@
             /***
              * Execute the $http call with extra functionality (like last call detection and http stop)
              * @param httpObj
-             * @returns {Promise}
+             * @returns {Promise} 
              */
 
             DBHelper.execute    =         function(httpObj,offlineSettings){

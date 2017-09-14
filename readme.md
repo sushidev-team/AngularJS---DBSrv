@@ -3,7 +3,7 @@
 An AngularJS (1.5+) service for using simple useage of RESTful Webservices with an build-in auto-mechanism for detecting access tokens.
 With this module you can access the RESTful API in a readable way.
 
-This module also includes also an automation for canceling previous api requests if a new api call with the same data is triggered before the old request is resolved. 
+This module also includes also an automation for canceling previous api requests if a new api call with the same data is triggered before the old request is resolved.
 For this feature you need to use the DBHelper Service (wrapper with extra functions for $http) included in this package.
 
 Otherwise the request will be made but the older related promise won't be resolved cause every request will get an request-ID. If the request ID does not belong to the latest call the promise will not be resolved at all (even errors).
@@ -13,7 +13,7 @@ Please be aware that the standard declarations for get/post/put/delete are based
 This module will be maintained by www.ambersive.com
 
 ### Version
-1.0.0.2
+1.0.0.4
 
 ### Installation
 
@@ -93,20 +93,27 @@ This declaration also includes automatic api $http cancelation for api calls.
 ```sh
  angular.module('moduleName').run(['DB','$q','DBHelper',
      function(DB,$q,DBHelper){
-     
+
          // Register the api call an run
-  
+
          DB({
              name:'Github',
              fnName:'test',
              fn:function(params){
-         
+
                  // Defining the actual action
-         
+
                  var deferred = $q.defer(),
                      httpObj  = {method:'GET',url:'http://jsonplaceholder.typicode.com/posts',params:params};
-         
-                 DBHelper.execute(httpObj).then(
+
+                 DBHelper.execute(httpObj{
+                   fn: function(){
+
+                       console.error('we are currently offline');
+
+                   },
+                   stop:false
+                 }).then(
                      function(data,status,headers,config){
                          deferred.resolve(data,headers);
                      },
@@ -114,11 +121,11 @@ This declaration also includes automatic api $http cancelation for api calls.
                          deferred.reject(data,headers);
                      }
                  );
-         
+
                  return deferred.promise;
              }
         }, true
-    
+
     }
 ]);  
 ```
@@ -129,20 +136,20 @@ This declaration also includes automatic api $http cancelation for api calls.
 
  angular.module('moduleName').run(['DB', '$http', '$q',
      function(DB, $http, $q){
-     
+
          // Register the api call an run
-  
+
          DB(
              {
                  name:'API NAME',
                  fnName:'METHODNAME',
                  fn:function(data){
-                 
+
                     // Defining the actual action
- 
+
                      var deferred = $q.defer(),
                          params   = {method:'GET',url:'URL GOES HER'};
- 
+
                      $http(params)
                          .success(function(data,status,headers,config){
                              deferred.resolve(data,headers);
@@ -150,12 +157,12 @@ This declaration also includes automatic api $http cancelation for api calls.
                          .error(function(data,status,headers,config){
                              deferred.reject(data,headers);
                          });
- 
+
                      return deferred.promise;
                  }
              }, true
          );
-    
+
     }
 ]);         
 
@@ -278,3 +285,8 @@ The following variables can be set:
 License
 ----
 MIT
+
+### Changelog
+
+1.0.0: Add DBHelper.execute to reduce network requests and stop the problems of getting old results into the resolve
+1.0.0.1 - 1.0.0.4: Bugfixing the DBHelper.execute. Create seperat promise to handle the api call. Add support for handling offline events
