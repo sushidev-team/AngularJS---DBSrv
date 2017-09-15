@@ -13,7 +13,7 @@ Please be aware that the standard declarations for get/post/put/delete are based
 This module will be maintained by www.ambersive.com
 
 ### Version
-1.0.0.4
+1.0.0.5
 
 ### Installation
 
@@ -85,6 +85,19 @@ You can check if a function exists with the $has(name)
  ]);
 
 ```
+### Single point of error (Catch error results from the api)
+
+Since version 1.0.0.5 this module supports a "single point of error" by providing to broadcast events.
+
+- DBHelperCatched401 (only called if $dbSettings.catch401Result returns true)
+- DBHelperCatchedError (if the first flag is not trirgged this event will be fired)
+
+Please be aware that the api-promise will do the normal reject-process, unless you pass a boolean to the $http-object (when you declare the custom api-call) or the $dbSettings.catchAllErrorResult returns "true".
+
+If you want to to set the $dbSettingsProvider values you can do so:
+
+- catch401Result: $dbSettings.setAllow401Catcher(BOOLEAN);
+- catchAllErrorResult: $dbSettings.setCatchAllErrorResult(BOOLEAN);
 
 ### Definig an Api (with DBHelper)
 
@@ -290,3 +303,4 @@ MIT
 
 1.0.0: Add DBHelper.execute to reduce network requests and stop the problems of getting old results into the resolve
 1.0.0.1 - 1.0.0.4: Bugfixing the DBHelper.execute. Create seperat promise to handle the api call. Add support for handling offline events
+1.0.0.5: Bugfixing - Add support for single point of error handling by providing $broadcast (DBHelperCatched401 and DBHelperCatchedError) events.

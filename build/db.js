@@ -115,8 +115,8 @@
         }
     ]);
 
-    angular.module('ambersive.db').factory('DBHelper', ['$http', '$q','$rootScope',
-        function ($http, $q, $rootScope) {
+    angular.module('ambersive.db').factory('DBHelper', ['$http', '$q','$rootScope','$dbSettings',
+        function ($http, $q, $rootScope,$dbSettings) {
 
             var DBHelper            = {};
             var DBHelperRegister    = [];
@@ -137,7 +137,7 @@
             /***
              * Execute the $http call with extra functionality (like last call detection and http stop)
              * @param httpObj
-             * @returns {Promise} 
+             * @returns {Promise}
              */
 
             DBHelper.execute    =         function(httpObj,offlineSettings){
@@ -194,7 +194,53 @@
                         })
                         .error(function(data,status,headers,config){
 
-                            if(data !== null){
+                            var stopResponse = false;
+
+                            if(angular.isDefined(httpObj.catchAllErrorResult) && angular.isBoolean(httpObj.catchAllErrorResult)){
+
+                                stopResponse = httpObj.catchAllErrorResult;
+
+                            }
+                            else {
+
+                                stopResponse = $dbSettings.catchAllErrorResult;
+
+                            }
+
+                            if(status!== 200){
+ 
+                                switch(status){
+
+                                    case 401:
+                                      if($dbSettings.catch401Result === true){
+
+                                          stopResponse = true;
+
+                                          $rootScope.$broadcast('DBHelperCatched401',{data:data,config:config, headers:headers, defer:defer});
+
+                                      }
+                                      else {
+
+                                          // To catch the error on a single spot
+
+                                          $rootScope.$broadcast('DBHelperCatchedError',{status:status,data:data,config:config, headers:headers, defer:defer});
+
+                                      }
+                                      break;
+
+                                    default:
+
+                                      // To catch the error on a single spot
+
+                                      $rootScope.$broadcast('DBHelperCatchedError',{status:status,data:data,config:config, headers:headers, defer:defer});
+
+                                      break;
+
+                                }
+
+                            }
+
+                            if(data !== null && stopResponse === false){
                                 defer.reject(data, config.isLast);
                             }
 
@@ -440,15 +486,17 @@
     angular.module('ambersive.db').provider('$dbSettings',[
         function(){
 
-            var baseUrl         = '',
-                contentType     = 'application/json; charset=utf-8;',
-                storageName     = 'accessToken',
-                storageLang     = 'language',
-                tokenType       = 'Bearer',
-                tokenName       = 'Authorization',
-                langName        = 'Language',
-                databaseName    = 'AMBERSIVE.DB',
-                routes          = {};
+            var baseUrl             = '',
+                contentType         = 'application/json; charset=utf-8;',
+                storageName         = 'accessToken',
+                storageLang         = 'language',
+                tokenType           = 'Bearer',
+                tokenName           = 'Authorization',
+                langName            = 'Language',
+                databaseName        = 'AMBERSIVE.DB',
+                routes              = {},
+                catch401Result      = true,
+                catchAllErrorResult = false;
 
             // Setter
 
@@ -500,6 +548,16 @@
                 return databaseName;
             };
 
+            var setCatch401Response = function(val){
+               catch401Result = val;
+               return catch401Result;
+            };
+
+            var setCatchAllErrorResult = function(val){
+                catchAllErrorResult = val;
+                return catchAllErrorResult;
+            };
+
             // Getter
 
             return {
@@ -510,18 +568,21 @@
                 setStorageName:         setStorageName,
                 setStorageLang:         setStorageLang,
                 setDatabaseName:        setDatabaseName,
+                setAllow401Catcher:     catch401Result,
                 $get:                   function () {
                     return {
-                        baseUrl:baseUrl,
-                        contentType:contentType,
-                        routes:routes,
-                        route:getRoute,
-                        storageName:storageName,
-                        storageLang:storageLang,
-                        tokenName:tokenName,
-                        tokenType:tokenType,
-                        langName:langName,
-                        databaseName:databaseName
+                        baseUrl:              baseUrl,
+                        contentType:          contentType,
+                        routes:               routes,
+                        route:                getRoute,
+                        storageName:          storageName,
+                        storageLang:          storageLang,
+                        tokenName:            tokenName,
+                        tokenType:            tokenType,
+                        langName:             langName,
+                        databaseName:         databaseName,
+                        catch401Result:       catch401Result,
+                        catchAllErrorResult:  catchAllErrorResult
                     };
                 }
             };
