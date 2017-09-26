@@ -28,6 +28,10 @@
             var req_params      = [];
             var req_param       = null;
 
+            if(angular.isDefined(config) === false || config === null){
+              return;
+            }
+
             params.push(config.method);
             params.push(config.url);
 
@@ -182,7 +186,11 @@
 
                     // Standard api call action
 
-                    httpParams.timeout  = defer.promise;
+                    if(angular.isDefined(httpParams) && httpParams !== null){
+
+                      httpParams.timeout  = defer.promise;
+
+                    }
 
                     regElement          = $http(httpParams)
                         .success(function(data,status,headers,config){
@@ -208,7 +216,7 @@
                             }
 
                             if(status!== 200){
- 
+
                                 switch(status){
 
                                     case 401:
@@ -755,7 +763,7 @@
 
                         }
 
-                        DBHelper.execute(tempParams).then(
+                        DBHelper.execute(params).then(
                             function(result){
                                 deferred.resolve(result);
                             },
@@ -788,7 +796,7 @@
 
                         }
 
-                        DBHelper.execute(tempParams).then(
+                        DBHelper.execute(params).then(
                             function(result){
                                 deferred.resolve(result);
                             },
@@ -821,7 +829,7 @@
 
                         }
 
-                        $DBHelper.execute(tempParams).then(
+                        $DBHelper.execute(params).then(
                             function(result){
                                 deferred.resolve(result);
                             },

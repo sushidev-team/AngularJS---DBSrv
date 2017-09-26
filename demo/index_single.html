@@ -33,7 +33,7 @@
                                     // Defining the actual action
 
                                     var deferred = $q.defer(),
-                                        httpObj  = {method:'GET',url:'http://jsonplaceholder.typicode.com/posts',params:params};
+                                        httpObj  = {method:'PUT',url:'http://jsonplaceholder.typicode.com/posts',params:params};
 
                                     DBHelper.execute(httpObj,{
                                       fn: function(){
@@ -71,7 +71,7 @@
                     $scope.do = function(){
 
                         var i      = 0;
-                        var l      = 10;
+                        var l      = 1;
 
                         console.warn('RUN TEST');
 
@@ -79,7 +79,7 @@
 
                             console.log('Make call ' + (i + 1));
 
-                            DB('Github').test({page: 1, test: 'Schüssel'}).then(function (result) {
+                            DB('Github2').update(1,{page: 1, test: 'Schüssel'}).then(function (result) {
                                 $scope.getData = result;
 
                                 console.log('Ergebnis: ' + (i + 1));
