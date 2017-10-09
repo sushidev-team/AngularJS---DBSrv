@@ -13,7 +13,7 @@ Please be aware that the standard declarations for get/post/put/delete are based
 This module will be maintained by www.ambersive.com
 
 ### Version
-1.0.0.6
+1.0.0.7
 
 ### Installation
 
@@ -301,6 +301,7 @@ MIT
 
 ### Changelog
 
-1.0.0: Add DBHelper.execute to reduce network requests and stop the problems of getting old results into the resolve
-1.0.0.1 - 1.0.0.4: Bugfixing the DBHelper.execute. Create seperat promise to handle the api call. Add support for handling offline events
-1.0.0.5: Bugfixing - Add support for single point of error handling by providing $broadcast (DBHelperCatched401 and DBHelperCatchedError) events.
+- 1.0.0: Add DBHelper.execute to reduce network requests and stop the problems of getting old results into the resolve
+- 1.0.0.1 - 1.0.0.4: Bugfixing the DBHelper.execute. Create seperat promise to handle the api call. Add support for handling offline events
+- 1.0.0.5: Bugfixing - Add support for single point of error handling by providing $broadcast (DBHelperCatched401 and DBHelperCatchedError) events.
+- 1.0.0.7: Bugfixing - $DBHelper - typo in delete standard routine

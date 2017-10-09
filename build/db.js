@@ -816,7 +816,7 @@
                      * @returns {Promise}
                      */
 
-                    delete:function(id,query){
+                    'delete':function(id,query){
 
                         var deferred = $q.defer(),
                             params = getParams('delete',settingsObj);
@@ -829,7 +829,7 @@
 
                         }
 
-                        $DBHelper.execute(params).then(
+                        DBHelper.execute(params).then(
                             function(result){
                                 deferred.resolve(result);
                             },
