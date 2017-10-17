@@ -296,7 +296,7 @@
                     },
                     function(errorResult){
                         if(errorResult !== null){
-                            deferred.reject(result);
+                            deferred.reject(errorResult);
                         }
                     }
                 );

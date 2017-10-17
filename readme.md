@@ -305,3 +305,4 @@ MIT
 - 1.0.0.1 - 1.0.0.4: Bugfixing the DBHelper.execute. Create seperat promise to handle the api call. Add support for handling offline events
 - 1.0.0.5: Bugfixing - Add support for single point of error handling by providing $broadcast (DBHelperCatched401 and DBHelperCatchedError) events.
 - 1.0.0.7: Bugfixing - $DBHelper - typo in delete standard routine
+- 1.0.0.8: Bugfixing - Correction of an reject variable
