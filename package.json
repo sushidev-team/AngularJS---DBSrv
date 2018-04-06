@@ -1,11 +1,12 @@
 {
-  "name": "AMBERSIVE-AngularModule-Config",
-  "version": "1.0.0.1",
+  "name": "ambersive-dbsrv",
+  "version": "1.0.0.9",
   "scripts": {
     "start": "grunt developement",
     "build": "grunt build",
     "test:e2e": ""
   },
+  "main": "build/db.js",
   "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -13,5 +14,15 @@
     "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-jshint": "~0.7.1",
     "grunt-contrib-watch": "~0.5.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AMBERSIVE/AngularJS---DBSrv"
+  },
+  "bugs": {
+    "url": "https://github.com/AMBERSIVE/AngularJS---DBSrv/issues"
+  },
+  "homepage": "https://github.com/AMBERSIVE/AngularJS---DBSrv",
+  "author": "Manuel Pirker-Ihl <office@ambersive.com> (http://ambersive.com)",
+  "license": "MIT",
 }
